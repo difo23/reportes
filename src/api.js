@@ -44,8 +44,22 @@ const postData = async (url, data) => {
 
 
 
+const getCursosByCode = async (props) => {
+
+    let res = await getData({
+        url: '/curso',
+        params: props
+    });
+
+
+
+    return res;
+};
+
+
 export {
     URL,
     postData,
     getData,
+    getCursosByCode
 };

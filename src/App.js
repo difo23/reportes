@@ -1,9 +1,10 @@
-
+import Reporte from './Repote';
 
 function App() {
   return (
     <div className="App">
-      <h1> Reportes</h1>
+
+      <Reporte />
     </div>
   );
 }

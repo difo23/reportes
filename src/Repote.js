@@ -1,23 +1,42 @@
 import React, { useState, useEffect } from 'react'
-
-
-import getCursosByCode from './getCursosByCode';
-import { postData, URL } from './api';
-
+import { postData, getCursosByCode, URL } from './api';
+import { useForm } from './useForm';
 
 function Reporte(props) {
 
     const initialState = {
         cursos: [],
-        user: getUser(),
-        error: false,
-        success: false,
-        message: '',
-
     };
 
+    const [values, handleInputChange] = useForm({ periodo: '' });
+    const { periodo } = values;
 
     const [state, setstate] = useState(initialState)
+
+    const update = () => {
+        getCursosByCode([{
+            key: 'codigo_periodo',
+            value: periodo
+        }]).then(data => setstate(
+            state => {
+
+                console.log(state.periodo, data);
+                return ({
+                    ...state,
+                    message: `${data?.length} Curso${data?.length < 2 ? '' : 's'} obtenido${data?.length < 2 ? '' : 's'} de  BD.`,
+                    cursos: data
+                })
+
+
+            })).catch((err) => setstate(state => {
+                return ({
+                    ...state,
+                    cursos: [],
+                    message: 'Revisar el internet!',
+                })
+            }))
+
+    }
 
 
 
@@ -25,30 +44,13 @@ function Reporte(props) {
 
         //cargar lista de cursos creados por el usuario
         console.log('Cargar todos los cursos creados por el usuario');
-        let username = getUser().username
-        getCursosByCode([{
-            key: 'codigo_titular',
-            value: username
-        }]).then(data => setstate(
-            state => {
-                return ({
-                    ...state,
-                    error: false,
-                    success: true,
-                    message: `${data.length} Curso${data.length < 2 ? '' : 's'} obtenido${data.length < 2 ? '' : 's'} de  BD.`,
-                    cursos: data
-                })
-            })).catch((err) => setstate(state => {
-                return ({
-                    ...state,
-                    cursos: [],
-                    message: 'Revisar el internet!',
-                    error: true,
-                    success: false,
-                })
-            }))
+        update();
+
 
     }, [])
+
+
+
 
 
     const hadledUpdate = (reporte) => {
@@ -64,21 +66,20 @@ function Reporte(props) {
                     setstate({
                         ...state,
                         message: `Los reportes de ${reporte.curso} fueron actualizados!`,
-                        error: false,
-                        success: true,
+
                     })
                     window.alert('Actualizacion completada!')
                 } else {
                     setstate({
                         ...state,
                         message: `No existen boletines para ${reporte.curso}!`,
-                        error: true,
-                        success: false,
+
                     })
                 }
 
             })
     }
+
 
 
     const hadledPDF = (reporte) => {
@@ -91,7 +92,7 @@ function Reporte(props) {
     }
 
 
-    const renderCursos = state.cursos.map((curso) => {
+    const renderCursos = state.cursos?.map((curso) => {
 
 
         const query = {
@@ -130,14 +131,42 @@ function Reporte(props) {
     return (
         <div className="container mt-3 mb-5" >
 
-            <h1>Reportes:
-                
-            </h1>
+            <div classNamme="col">
 
-          
-            <div className="row">
+                <div className="row mt-3 form-group">
+                    <h1>Reportes: </h1>
+                    <div className="input-group mt-3 mb-3">
+                        <input
+                            type="text"
+                            className="form-control"
+                            name='periodo'
+                            placeholder="Buscar por peridodo, ejem: 2020-2021"
+                            value={periodo}
+                            onChange={handleInputChange}
+                        />
+                        <div className="input-group-append">
+                            <button
+                                className="btn btn-outline-primary"
+                                type="button"
+                                onClick={update}
+                            >
+                                Buscar
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+
+
+                <div className="row justify-content-center">
+
+                        {renderCursos}
+                </div>
+
 
             </div>
+
 
         </div>
     )
