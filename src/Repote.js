@@ -55,7 +55,7 @@ function Reporte(props) {
 
     const hadledUpdate = (reporte) => {
 
-        console.log('UPDATE REPORTES')
+       
 
         postData('/reportes/create', reporte)
             .then((res) => { return res.json() })
@@ -114,6 +114,7 @@ function Reporte(props) {
                     <h5 className="card-title">Reporte</h5>
                     <h6 className="card-subtitle mb-2 text-muted"> {`${curso.codigo_curso}`}</h6>
                     <p className="card-text"> Periodo Educativo: {curso.codigo_periodo}</p>
+                    <p className="card-text"> Titular: {curso.nombre_titular}</p>
                     <button
                         onClick={() => hadledUpdate(query)}
                         className="btn btn-outline-danger mr-1"
