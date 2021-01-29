@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { postData, getCursosByCode, URL } from './api';
 import { useForm } from './useForm';
+import Swal from 'sweetalert2';
 
 function Reporte(props) {
 
     const initialState = {
         cursos: [],
+        reporte: false,
     };
 
     const [values, handleInputChange] = useForm({ periodo: '' });
@@ -21,6 +23,13 @@ function Reporte(props) {
             state => {
 
                 console.log(state.periodo, data);
+                if (data?.length) {
+                    Swal.fire(
+                        `Reportes ${periodo} Cargados! `,
+                        'Click para cerrar!',
+                        'success'
+                    )
+                }
                 return ({
                     ...state,
                     message: `${data?.length} Curso${data?.length < 2 ? '' : 's'} obtenido${data?.length < 2 ? '' : 's'} de  BD.`,
@@ -29,6 +38,11 @@ function Reporte(props) {
 
 
             })).catch((err) => setstate(state => {
+                Swal.fire(
+                    `Reportes ${periodo} error cargando! `,
+                    'Click para cerrar!',
+                    'error'
+                )
                 return ({
                     ...state,
                     cursos: [],
@@ -55,7 +69,7 @@ function Reporte(props) {
 
     const hadledUpdate = (reporte) => {
 
-       
+
 
         postData('/reportes/create', reporte)
             .then((res) => { return res.json() })
@@ -68,13 +82,25 @@ function Reporte(props) {
                         message: `Los reportes de ${reporte.curso} fueron actualizados!`,
 
                     })
-                    window.alert('Actualizacion completada!')
+
+
+                    Swal.fire(
+                        'Reporte actualizado!',
+                        'Click para cerrar!',
+                        'success'
+                    )
                 } else {
                     setstate({
                         ...state,
                         message: `No existen boletines para ${reporte.curso}!`,
 
                     })
+
+                    Swal.fire(
+                        'Error vuelve a intentarlo!',
+                        'Click para cerrar!',
+                        'error'
+                    )
                 }
 
             })
@@ -82,12 +108,21 @@ function Reporte(props) {
 
 
 
-    const hadledPDF = (reporte) => {
+    const hadledPDF = async (reporte) => {
 
         const urlComplete = `${URL}${'/reporte/pdf'}/${reporte._id}`;
-        console.log('GET PDF', urlComplete)
 
-        window.open(urlComplete)
+        try {
+            let mywin = window.open(urlComplete, '_blank');
+
+
+
+            setstate({ ...state, reporte: urlComplete })
+
+        } catch (error) {
+            console.log('GET PDF Error')
+        }
+
 
     }
 
@@ -115,6 +150,7 @@ function Reporte(props) {
                     <h6 className="card-subtitle mb-2 text-muted"> {`${curso.codigo_curso}`}</h6>
                     <p className="card-text"> Periodo Educativo: {curso.codigo_periodo}</p>
                     <p className="card-text"> Titular: {curso.nombre_titular}</p>
+
                     <button
                         onClick={() => hadledUpdate(query)}
                         className="btn btn-outline-danger mr-1"
@@ -134,12 +170,12 @@ function Reporte(props) {
 
             <div classNamme="col">
 
-                <div className="row mt-3 form-group">
-                    <h1>Reportes: </h1>
+                <div className="row mt-5 form-group">
+                    <h1 className="ml-2">Reportes: </h1>
                     <div className="input-group mt-3 mb-3">
                         <input
                             type="text"
-                            className="form-control"
+                            className="form-control ml-2 "
                             name='periodo'
                             placeholder="Buscar por peridodo, ejem: 2020-2021"
                             value={periodo}
@@ -162,7 +198,7 @@ function Reporte(props) {
 
                 <div className="row justify-content-center">
 
-                        {renderCursos}
+                    {renderCursos}
                 </div>
 
 
